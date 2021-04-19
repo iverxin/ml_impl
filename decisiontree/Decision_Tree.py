@@ -3,7 +3,7 @@ import numpy as np
 
 import math
 
-
+#决策树
 class TreeNode:
     def __init__(self,flag,category,subtreenum,axis,value):
         self.flag = flag                                 #标记是不是叶子节点

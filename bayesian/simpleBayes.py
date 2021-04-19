@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import math
 
+#朴素贝叶斯分类
+
 class NaiveBayes:
     def __init__(self,dataspath):
         self.model = {}

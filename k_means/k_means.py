@@ -2,6 +2,8 @@ import math
 import numpy as np
 import pandas as pd
 
+#K均值 聚类
+
 class K_means:
     def __init__(self,dataspath,k):
         '''
