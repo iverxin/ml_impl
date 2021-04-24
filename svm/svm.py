@@ -18,7 +18,7 @@ class SVM:
         # hyparamters
         self.MAX_ITER_NUM = 10
         # 惩罚参数，是个超参数。越大对误分类的惩罚越大。
-        self.C = 10 #TODO the C need to init the some method
+        self.C = 100 #TODO the C need to init the some method
 
     def rand_j(self, i, m ):
         """
@@ -102,7 +102,7 @@ class SVM:
 
                 # update the alpha2
                 if eta==0:
-                    eta +=1e-6 # 防止eta为0
+                    eta +=1e-6
                 alpha2_unclip = alpha2+y2*(E1-E2)/eta
 
                 # clip alpha2
