@@ -27,9 +27,9 @@ import torch
 import torch.nn.modules as nn
 import jindutiao
 
-LR = 0.001
+LR = 0.0001
 Batch_Size = 128
-Epoch = 30
+Epoch = 50
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class CNN_model(nn.Module):
@@ -110,11 +110,11 @@ def Test(model):
                 count += 1
         jindutiao.progress(jindutiao_index,len(test_datas.dataset)/128)
         jindutiao_index += 1
-    print("\n此Linear模型准确率为：{}".format(count/length))
+    print("\n此CNN模型准确率为：{}".format(count/length))
 
 def main():
-    #model = train()
-    #torch.save(model, './model_save/CNN_model.pth')
+    model = train()
+    torch.save(model, './model_save/CNN_model.pth')
     model = torch.load('./model_save/CNN_model.pth').to('cpu')
     Test(model)
 

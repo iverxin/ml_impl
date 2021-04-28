@@ -79,7 +79,7 @@ class Resnet_model(nn.Module):
     def forward(self,input):
         x = self.conv2d_1(input)
         x = self.batchnorm2d(x)
-        x = self.relu(x)
+        # x = self.relu(x)
         x = self.avgpool2d(x)
 
         for i in range(4):
@@ -154,11 +154,11 @@ def Test(model):
                 count += 1
         jindutiao.progress(jindutiao_index,len(test_datas.dataset)/128)
         jindutiao_index += 1
-    print("\n此Linear模型准确率为：{}".format(count/length))
+    print("\n此Resnet模型准确率为：{}".format(count/length))
 
 def main():
-    # model = train()
-    # torch.save(model, './model_save/resnet_model.pth')
+    model = train()
+    torch.save(model, './model_save/resnet_model.pth')
     model = torch.load('./model_save/resnet_model.pth').to('cpu')
     Test(model)
 
