@@ -13,6 +13,9 @@ import torch
 import torch.nn.modules as nn
 import torchtext
 from torch import Tensor
+import os
+
+from public_tools.logger import Logger
 
 
 class MyTransformer(nn.Module):
@@ -136,7 +139,10 @@ def create_behind_mask(batch_size, n_head, seq_len):
     mask = mask* torch.ones(batch_size*n_head, 1, 1)
     return mask
 
-def train():
+def train(gpu=True):
+
+    if not os.path.exists("model_save"):
+        os.mkdir("model_save")
     MAX_STEPS = 2000
 
     batch_size = 16
@@ -146,30 +152,66 @@ def train():
     train_iter, val_iter = create_dict(batch_size)
     en_vocb_size = len(EN_TEXT.vocab)
     zh_vocb_size = len(ZH_TEXT.vocab)
+    print("EN-Vocab size:{}".format(en_vocb_size))
+    print("ZH-Vocab size:{}".format(zh_vocb_size))
+
     model = MyTransformer(dict_size_1=en_vocb_size, dict_size_2=zh_vocb_size,
                           embedding_dim=100, nhead=n_head)
+    if gpu:
+        model = model.cuda()
 
+    loss_fn = nn.CrossEntropyLoss()
+    opt = torch.optim.Adam(model.parameters(), lr=0.0001)
+
+    logger = Logger("log.txt", print_flag=True)
     EPOCH = 1
     for epoch in range(EPOCH):
+        loss_epoch = 0
+        counter = 0
+
         for batch in train_iter:
+            counter+=1
             # batch 的尺寸是 (seq_len, batch_size)
             # 这里进行一下维度调整。
             input = batch.en.permute(1,0) # batch_size, seq_len
             target = batch.zh.permute(1,0)
             # 准备mask
             input_mask = create_padding_mask(input,n_head=n_head)
-            print(input_mask.shape)
-            print(input_mask.shape)
-            print(input_mask)
+            # print(input_mask.shape)
+            # print(input_mask.shape)
+            # print(input_mask)
             target_behind_mask = create_behind_mask(batch_size, n_head, seq_len)
             target_padding_mask = create_padding_mask(target, n_head=n_head)
             target_mask = torch.max(target_behind_mask, target_padding_mask)
-            print("inputMask \n",input_mask)
-            print("tgtMask \n",target_mask)
+            # print("inputMask \n",input_mask)
+            # print("tgtMask \n",target_mask)
+
+            if gpu:
+                input = input.cuda()
+                target = target.cuda()
+                input_mask = input_mask.cuda()
+                target_mask = target_mask.cuda()
 
             # 喂入模型
             output = model(input, target, src_mask =input_mask,tgt_mask = target_mask) # B,L,E
-            break
+            target = target.reshape(batch_size*seq_len, -1).squeeze()
+            output = output.reshape(batch_size * seq_len,-1)
+
+            opt.zero_grad()
+            loss = loss_fn(output, target)
+            print(loss)
+            loss.backward()
+            # Update parameters
+            opt.step()
+            loss = loss.cpu()
+            loss_epoch+=loss
+
+        logger.log("epoch:{} | loss:{}".format(epoch, loss_epoch/counter))
+        if epoch % 10 ==0 and epoch!=0:
+            torch.save(model, "model_save/model_{}.model".format(epoch))
+    torch.save(model, "model_save/model_final.model")
+
+    print("save model to model_save")
 
 
 

@@ -137,8 +137,8 @@ def create_dict():
                                     )
 
     train, val = torchtext.legacy.data.TabularDataset.splits(path='../database/en-zh/generate/',
-                                                        train = 'train_en_zh.csv',
-                                                        validation='test_en_zh.csv',
+                                                        train = 'test.csv',
+                                                        validation='test.csv',
                                                         skip_header=True,format='csv',fields = [('en', EN_TEXT), ('zh', ZH_TEXT)])
     # 显示样本
     print(len(train[1].en), train[1].en)
